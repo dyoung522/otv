@@ -8,14 +8,13 @@ import sys
 # Constants
 
 AUTHOR = "Donovan C. Young"
-VERSION = "0.0.2"
-PROGRAM = "Ortho4XP Tile Validator"
+ORTHO = "Ortho4XP"
+PROGRAM = "{} Tile Validator".format(ORTHO)
+VERSION = "0.0.3"
 
 # Global variables
 
-errors = []
 ortho_dir = None
-tiles = []
 
 
 # Functions
@@ -36,8 +35,9 @@ def usage(message=""):
 
     print()
     print(f"{color.Fore.LIGHTGREEN_EX}{Version()}\n")
-    print("When given a valid Ortho4 directory, this program will scan all Tiles and report any problems it finds.")
-    print(color.Style.BRIGHT + f"\nUsage: {sys.argv[0]} <Ortho4XP-directory>")
+    print("When given a valid {} directory, this program will scan all Tiles and report any problems it finds.".format(
+        ORTHO))
+    print(color.Style.BRIGHT + "\nUsage: {} <{} directory>".format(sys.argv[0], ORTHO))
 
     exit()
 
@@ -65,40 +65,52 @@ class OrthoTile:
         self.tile_dir = f"Tiles/{self.tile_name}"
         (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
 
+    def directories(self):
+        return ["earth nav data", "terrain", "textures"]
+
     def validate(self):
         errors = []
 
-        print(f"Analyzing {self.tile_name}...", end="")
+        print(f"Analyzing {self.tile_name}... ")
 
-        if not os.path.isdir(f"{self.tile_dir}/earth nav data"): errors.append('No "Earth Nav Data" directory found')
-        if not os.path.isdir(f"{self.tile_dir}/terrain"): errors.append('No terrain directory found')
-        if not os.path.isdir(f"{self.tile_dir}/terrain"): errors.append('No textures directory found')
+        print("  Directories...")
+        for dir in self.directories():
+            print("    {} -> ".format(dir), end="")
 
-        if len(errors) != 0:
-            print(color.Fore.RED + " Errors!")
-            for error in errors:
-                print("  ->", color.Fore.RED + error)
-            print()
-        else:
-            print(" Okay")
+            if not os.path.isdir(f"{self.tile_dir}/{dir}"):
+                print(color.Fore.RED + "Not Found!")
+                errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
+            else:
+                print(color.Fore.GREEN + "Okay")
+
+        return errors
 
 
 ########
 # MAIN #
 ########
 if __name__ == '__main__':
+    errors = []
+
     setup()  # Initialize the program
 
-    if not os.path.isdir(ortho_dir): usage("Please provide a valid Ortho4 directory")
+    if not os.path.isdir(ortho_dir): usage("Please provide a valid {} directory".format(ORTHO))
 
     os.chdir(ortho_dir)
 
     if not os.path.exists("Tiles"):
-        usage(f"'{ortho_dir}' does not appear to be a valid Ortho directory, if it is, I cannot find any Tiles.")
+        usage("\"{}\" does not appear to be a valid {} directory, if it is, I cannot find any Tiles.".format(
+            ortho_dir, ORTHO))
 
-    tiles.extend(os.listdir("Tiles"))
+    for tile in os.listdir("Tiles"):
+        errors.extend(OrthoTile(tile).validate())
 
-    for tile in tiles:
-        OrthoTile(tile).validate()
+    print()
+    if len(errors) == 0:
+        print(color.Fore.LIGHTGREEN_EX + "All Tiles OKAY")
+    else:
+        print(color.Fore.LIGHTRED_EX + "Errors Found:")
+        for error in errors:
+            print("  ->", error)
 
     color.deinit()  # Colorama
