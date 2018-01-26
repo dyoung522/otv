@@ -5,15 +5,14 @@ import os
 import re
 import sys
 
+# Constants
+
+AUTHOR = "Donovan C. Young"
+VERSION = "0.0.2"
+PROGRAM = "Ortho4XP Tile Validator"
+
 # Global variables
 
-program = dict(
-    author="Donovan C. Young",
-    long_name="Ortho4XP Tile Validator",
-    short_name=os.path.basename(sys.argv[0]).rstrip(".py"),
-    version="0.0.1",
-    version_string=""
-)
 errors = []
 ortho_dir = None
 tiles = []
@@ -22,16 +21,9 @@ tiles = []
 # Functions
 
 def setup():
-    global ortho_dir, program
+    global ortho_dir
 
     color.init(autoreset=True)  # Colorama
-
-    program['version_string'] = "{} {} v{} - written by {}".format(
-        program['long_name'],
-        program['short_name'],
-        program['version'],
-        program['author']
-    )
 
     try:
         ortho_dir = sys.argv[1]
@@ -43,7 +35,7 @@ def usage(message=""):
     if message != "": print(color.Fore.RED + color.Style.BRIGHT + f"!!! {message} !!!")
 
     print()
-    print(color.Fore.LIGHTGREEN_EX + program['version_string'], "\n")
+    print(f"{color.Fore.LIGHTGREEN_EX}{Version()}\n")
     print("When given a valid Ortho4 directory, this program will scan all Tiles and report any problems it finds.")
     print(color.Style.BRIGHT + f"\nUsage: {sys.argv[0]} <Ortho4XP-directory>")
 
@@ -51,6 +43,16 @@ def usage(message=""):
 
 
 # Classes
+
+class Version:
+    program_name = None
+
+    def __init__(self):
+        self.program_name = os.path.basename(sys.argv[0]).rstrip(".py")
+
+    def __format__(self, format_spec):
+        return "{} ({}) v{} - written by {}".format(PROGRAM, self.program_name, VERSION, AUTHOR)
+
 
 class OrthoTile:
     lat = None
