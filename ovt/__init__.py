@@ -54,6 +54,7 @@ def usage(message=""):
 
 def main():
     errors = []
+    tile_count = 0
 
     setup()  # Initialize the program
 
@@ -66,13 +67,15 @@ def main():
               .format(ortho_dir, ORTHO))
 
     for tile in os.listdir("Tiles"):
+        tile_count += 1
         errors.extend(Tile(tile).validate())
 
-    print()
+    print("\nScanned {} tiles... ".format(tile_count), end="")
+
     if len(errors) == 0:
-        print(color.Fore.LIGHTGREEN_EX + "All Tiles OKAY")
+        print(color.Fore.LIGHTGREEN_EX + "All OKAY")
     else:
-        print(color.Fore.LIGHTRED_EX + "Errors Found:")
+        print(color.Fore.LIGHTRED_EX + "{} Errors Found:".format(len(errors)))
         for error in errors:
             print("  ->", error)
 
