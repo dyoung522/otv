@@ -8,7 +8,7 @@ from .ortho import Tile
 AUTHOR = "Donovan C. Young"
 ORTHO = "Ortho4XP"
 PROGRAM = "{} Tile Validator".format(ORTHO)
-VERSION = "0.0.3"
+VERSION = "0.1.0"
 
 ortho_dir = None
 
@@ -43,9 +43,8 @@ def usage(message=""):
 
     print()
     print(f"{color.Fore.LIGHTGREEN_EX}{Version()}\n")
-    print("""
-        When given a valid {} directory, this program will scan all Tiles and report any problems it finds.
-    """.format(ORTHO))
+    print("""When given a valid {} directory, this program will scan all Tiles and report any problems it finds."""
+          .format(ORTHO))
     print(color.Style.BRIGHT + "\nUsage: {} <{} directory>".format(sys.argv[0], ORTHO))
 
     exit()
