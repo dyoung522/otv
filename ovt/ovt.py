@@ -65,17 +65,17 @@ def main():
         tile_count += 1
         errors.extend(Tile(tile).validate())
 
-    print("\nScanned {}... ".format(pluralize(tile_count, "Tile", "Tiles")), end="")
+    print("\nScanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
     err_count = len(errors)
     if err_count == 0:
         print(color.Fore.LIGHTGREEN_EX + "All OKAY")
     else:
-        print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error", "Errors")))
+        print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
         for error in errors:
             print("  ->", error)
 
     for c in range(0, 3):
-        print(pluralize(c, "test", "tests"))
+        print(pluralize(c, "test"))
         
     color.deinit()  # Colorama

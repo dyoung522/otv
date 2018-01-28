@@ -1,7 +1,10 @@
 __all__ = ["pluralize"]
 
 
-def pluralize(count, singular, plural):
+def pluralize(count, singular, plural=None):
+    if plural is None:
+        plural = singular + "s"
+
     if count == 0:
         return "{} {}".format("no", plural)
 
