@@ -2,6 +2,7 @@ import os
 import re
 import colorama as color
 
+
 class Tile:
     lat = None
     long = None
@@ -33,4 +34,3 @@ class Tile:
                 print(color.Fore.GREEN + "Okay")
 
         return errors
-

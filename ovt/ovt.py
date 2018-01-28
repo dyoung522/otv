@@ -2,6 +2,7 @@ import colorama as color
 import os
 import sys
 from .ortho import Tile
+from .util import pluralize
 
 # Global variables
 
@@ -26,7 +27,8 @@ class Version:
 # Functions
 
 def usage(message=""):
-    if message != "": print(color.Fore.RED + color.Style.BRIGHT + f"!!! {message} !!!")
+    if message != "":
+        print(color.Fore.RED + color.Style.BRIGHT + f"!!! {message} !!!")
 
     print()
     print(f"{color.Fore.LIGHTGREEN_EX}{Version()}\n")
@@ -63,13 +65,17 @@ def main():
         tile_count += 1
         errors.extend(Tile(tile).validate())
 
-    print("\nScanned {} tiles... ".format(tile_count), end="")
+    print("\nScanned {}... ".format(pluralize(tile_count, "Tile", "Tiles")), end="")
 
-    if len(errors) == 0:
+    err_count = len(errors)
+    if err_count == 0:
         print(color.Fore.LIGHTGREEN_EX + "All OKAY")
     else:
-        print(color.Fore.LIGHTRED_EX + "{} Errors Found:".format(len(errors)))
+        print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error", "Errors")))
         for error in errors:
             print("  ->", error)
 
+    for c in range(0, 3):
+        print(pluralize(c, "test", "tests"))
+        
     color.deinit()  # Colorama
