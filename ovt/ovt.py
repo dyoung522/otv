@@ -44,9 +44,12 @@ def usage(message=""):
 def main():
     errors = []
     tile_count = 0
-    ortho_dir = None
 
     color.init(autoreset=True)  # Colorama
+
+    # ToDo: Make these a command line arguments
+    ortho_dir = None
+    verbose = 1
 
     try:
         ortho_dir = sys.argv[1]
@@ -61,9 +64,20 @@ def main():
         usage("\"{}\" does not appear to be a valid {} directory, if it is, I cannot find any Tiles."
               .format(ortho_dir, ORTHO))
 
+    # Run the validations for each Tile
     for tile in os.listdir("Tiles"):
         tile_count += 1
-        errors.extend(Tile(tile).validate())
+        err_count = len(errors)
+
+        print("Analyzing Tile {:.<25} ".format(tile), end="")
+        if verbose > 1: print("validating...")
+
+        errors.extend(Tile(tile, {"verbose": verbose > 1}).validate())
+
+        if len(errors) == err_count:
+            if verbose == 1: print(color.Fore.GREEN + "OKAY")
+        else:
+            if verbose == 1: print(color.Fore.RED + "ERROR")
 
     print("\nScanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
@@ -75,7 +89,4 @@ def main():
         for error in errors:
             print("  ->", error)
 
-    for c in range(0, 3):
-        print(pluralize(c, "test"))
-        
     color.deinit()  # Colorama
