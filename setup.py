@@ -10,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name="ovt",
-    version="0.1.0",
+    version="0.2.1-dev",
     license='MIT',
 
     description="Ortho4XP Tile Validator",

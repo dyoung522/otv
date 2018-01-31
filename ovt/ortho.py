@@ -17,15 +17,15 @@ class Tile:
         self.tile_name = tile
         self.tile_dir = f"Tiles/{self.tile_name}"
         (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
-        self.opts["verbose"] = opts["verbose"] if "verbose" in opts else False
+        self.opts["verbose"] = opts["verbose"] if "verbose" in opts else 0
 
     def validate(self):
         for dir in self.DIRECTORIES:
-            if self.opts["verbose"]: print("  directory {:.<20}".format(dir), end="")
+            if self.opts["verbose"] > 1: print("  directory {:.<20}".format(dir), end="")
             if getattr(self, "validate_{}".format(re.sub("\s+", "_", dir)))():
-                if self.opts["verbose"]: print(color.Fore.GREEN + " OKAY")
+                if self.opts["verbose"] > 1: print(color.Fore.GREEN + " OKAY")
             else:
-                if self.opts["verbose"]: print(color.Fore.RED + " ERROR")
+                if self.opts["verbose"] > 1: print(color.Fore.RED + " ERROR")
 
         return self.errors
 

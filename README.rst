@@ -15,5 +15,5 @@ ____________
 ::
     $ pip install ovt
 
-This will install an `ovt` script, so if you're paths are setup correctly you
+This will install an `ovt` script, so if your paths are setup correctly you
 should be able to simply run `ovt` from your system's command line.

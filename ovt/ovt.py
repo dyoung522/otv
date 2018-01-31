@@ -3,13 +3,16 @@ import os
 import sys
 from .ortho import Tile
 from .util import pluralize
+from .argparse import ArgParse
 
 # Global variables
 
 AUTHOR = "Donovan C. Young"
 ORTHO = "Ortho4XP"
 PROGRAM = "{} Tile Validator".format(ORTHO)
-VERSION = "0.1.0"
+VERSION = "0.2.1-dev"
+
+global args
 
 
 # Classes
@@ -26,67 +29,77 @@ class Version:
 
 # Functions
 
-def usage(message=""):
-    if message != "":
-        print(color.Fore.RED + color.Style.BRIGHT + f"!!! {message} !!!")
+def log(message, verbosity=0, newline=True):
+    global args
 
-    print()
-    print(f"{color.Fore.LIGHTGREEN_EX}{Version()}\n")
-    print("""When given a valid {} directory, this program will scan all Tiles and report any problems it finds."""
-          .format(ORTHO))
-    print(color.Style.BRIGHT + "\nUsage: {} <{} directory>".format(sys.argv[0], ORTHO))
+    extra_opts = dict()
 
+    if not newline:
+        extra_opts = dict(end="")
+
+    if args.verbose > verbosity:
+        print(message, **extra_opts)
+
+
+def usage(help_message, error_message=""):
+    if error_message != "": log(color.Fore.RED + color.Style.BRIGHT + f"!!! {error_message} !!!\n")
+    log(help_message)
     exit()
 
 
 # Main
 
 def main():
+    global args
+
     errors = []
     tile_count = 0
 
     color.init(autoreset=True)  # Colorama
 
-    # ToDo: Make these command line arguments
-    ortho_dir = None
-    verbose = 1
+    argparse = ArgParse(version=f"{Version()}")
 
-    try:
-        ortho_dir = sys.argv[1]
-    except:
-        usage()
+    args = argparse.args
+    help_message = argparse.help
 
-    if not os.path.isdir(ortho_dir): usage("Please provide a valid {} directory".format(ORTHO))
+    if args.quiet: args.verbose = 0
 
-    os.chdir(ortho_dir)
+    if not os.path.isdir(args.tile_directory): usage(help_message, "Please provide a valid {} directory".format(ORTHO))
+
+    os.chdir(args.tile_directory)
 
     if not os.path.exists("Tiles"):
-        usage("\"{}\" does not appear to be a valid {} directory, if it is, I cannot find any Tiles."
-              .format(ortho_dir, ORTHO))
+        usage(help_message, "\"{}\" does not appear to be a valid {} directory, if it is, I cannot find any Tiles."
+              .format(args.tile_directory, ORTHO))
 
     # Run the validations for each Tile
     for tile in os.listdir("Tiles"):
         tile_count += 1
         err_count = len(errors)
 
-        print("Analyzing Tile {:.<25} ".format(tile), end="")
-        if verbose > 1: print("validating...")
+        log("Analyzing Tile ", newline=False)
+        if args.verbose == 1:
+            log("{:.<25} ".format(tile), newline=False)
+        else:
+            log("{}".format(tile))
 
-        errors.extend(Tile(tile, {"verbose": verbose > 1}).validate())
+        errors.extend(Tile(tile, {"verbose": args.verbose}).validate())
 
         if len(errors) == err_count:
-            if verbose == 1: print(color.Fore.GREEN + "OKAY")
+            if args.verbose == 1: log(color.Fore.GREEN + "OKAY")
         else:
-            if verbose == 1: print(color.Fore.RED + "ERROR")
+            if args.verbose == 1: log(color.Fore.RED + "ERROR")
 
-    print("\nScanned {}... ".format(pluralize(tile_count, "Tile")), end="")
+    log("\nScanned {}... ".format(pluralize(tile_count, "Tile")), newline=False)
 
     err_count = len(errors)
     if err_count == 0:
-        print(color.Fore.LIGHTGREEN_EX + "All OKAY")
+        log(color.Fore.LIGHTGREEN_EX + "All OKAY")
     else:
-        print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
+        log(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
         for error in errors:
-            print("  ->", error)
+            log("  -> {}".format(error))
 
     color.deinit()  # Colorama
+
+    exit(err_count)
