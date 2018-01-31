@@ -47,7 +47,7 @@ def main():
 
     color.init(autoreset=True)  # Colorama
 
-    # ToDo: Make these a command line arguments
+    # ToDo: Make these command line arguments
     ortho_dir = None
     verbose = 1
 
