@@ -1,5 +1,5 @@
 import pytest
-from ovt.util import *
+from otv.util import *
 
 
 @pytest.mark.parametrize("count, singular, plural, expect", [

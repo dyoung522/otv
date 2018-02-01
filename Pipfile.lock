@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f8ef191e6a0701b11b4cf0a81cc345c78f2a5419169040633b99945d1e2149d9"
+            "sha256": "02052f58f75f8f1adfd411cc59dc609149f50c50a0562ec4b3167b6569b01c6e"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -55,12 +55,6 @@
                 "sha256:ca18943e28235417756316bfada6cd96b23ce60dd532642690dcfdaba988a76d"
             ],
             "version": "==1.5.2"
-        },
-        "pyfakefs": {
-            "hashes": [
-                "sha256:e3e198dea5e0d5627b73ba113fd0b139bb417da6bc15d920b2c873143d2f12a6"
-            ],
-            "version": "==3.3"
         },
         "pytest": {
             "hashes": [

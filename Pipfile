@@ -13,4 +13,3 @@ colorama = "*"
 [dev-packages]
 
 pytest = "*"
-pyfakefs = "*"

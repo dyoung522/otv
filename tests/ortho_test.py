@@ -1,5 +1,5 @@
 import os
-from ovt.ortho import Tile
+from otv.ortho import Tile
 import pytest
 
 lat = "+11"

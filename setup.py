@@ -1,6 +1,7 @@
-from setuptools import setup, find_packages
 from codecs import open
 from os import path
+from otv.globals import VERSION
+from setuptools import setup, find_packages
 
 here = path.abspath(path.dirname(__file__))
 
@@ -9,13 +10,13 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name="ovt",
-    version="0.2.1-dev",
+    name="otv",
+    version=VERSION,
     license='MIT',
 
     description="Ortho4XP Tile Validator",
     long_description=long_description,
-    url="https://github.com/dyoung522/ovt",
+    url="https://github.com/dyoung522/otv",
 
     author="Donovan C. Young",
     author_email="dyoung522@gmail.com",
@@ -36,6 +37,6 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=['colorama'],
-    entry_points={'console_scripts': ['ovt=ovt:main']},
+    entry_points={'console_scripts': ['otv=otv:main']},
 )
 

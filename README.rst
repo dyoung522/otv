@@ -11,9 +11,10 @@ It does not modify any files within the Ortho4XP directory.
 
 Installation
 ____________
-
 ::
-    $ pip install ovt
 
-This will install an `ovt` script, so if your paths are setup correctly you
-should be able to simply run `ovt` from your system's command line.
+    $ pip install otv
+
+This will install an `otv` script, so if your PATH is setup correctly you
+should be able to simply run `otv` from your system's command line.
+
