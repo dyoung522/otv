@@ -29,6 +29,7 @@ def main():
     args = argparse.args
     help_message = argparse.help
 
+    tile_dir = os.path.join(args.tile_directory, "Tiles")
     verbose = args.verbosity > 0
 
     if not os.path.isdir(args.tile_directory):
@@ -36,34 +37,36 @@ def main():
               "Please provide a directory where Ortho4XP Tiles can be found"
               )
 
-    os.chdir(args.tile_directory)
-
-    if not os.path.exists("Tiles"):
+    if not os.path.exists(tile_dir):
         usage(help_message,
               "\"{}\" does not appear to be a valid Ortho4XP directory, or if it is, I cannot find any Tiles."
               .format(args.tile_directory),
               args.verbosity
               )
 
+    os.chdir(args.tile_directory)
+
+    if verbose: log(VERSION_STR)
+
     # Run the validations for each Tile
-    for tile in os.listdir("Tiles"):
+    for tile in os.listdir(tile_dir):
         tile_count += 1
         err_count = len(errors)
 
-        if verbose: log("Analyzing Tile ", end="")
+        if verbose: log(os.linesep + "Analyzing Tile ", end="")
         if args.verbosity == 1:
             log("{:.<25} ".format(tile), end="")
         else:
             if verbose: log("{}".format(tile))
 
-        errors.extend(Tile(tile, {"verbose": args.verbosity}).validate())
+        errors.extend(Tile(tile, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
             if args.verbosity == 1: log(color.Fore.GREEN + "OKAY")
         else:
             if args.verbosity == 1: log(color.Fore.RED + "ERROR")
 
-    if verbose: log("\nScanned {}... ".format(pluralize(tile_count, "Tile")), end="")
+    if verbose: log(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
     err_count = len(errors)
     if err_count == 0:

@@ -13,9 +13,9 @@ class Tile:
     opts = {}
     errors = []
 
-    def __init__(self, tile, opts={}):
+    def __init__(self, tile, **opts):
         self.tile_name = tile
-        self.tile_dir = f"Tiles/{self.tile_name}"
+        self.tile_dir = os.path.join("Tiles", self.tile_name)
         (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
         self.opts["verbose"] = opts["verbose"] if "verbose" in opts else 0
 
@@ -30,11 +30,13 @@ class Tile:
         return self.errors
 
     def validate_dir(self, dir):
-        if not os.path.isdir(f"{self.tile_dir}/{dir}"):
+        path = os.path.join(self.tile_dir, dir)
+
+        if not os.path.isdir(path):
             self.errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
             return False
 
-        if not os.listdir(f"{self.tile_dir}/{dir}"):
+        if not os.listdir(path):
             self.errors.append("Directory \"{}\" for Tile {} IS EMPTY".format(dir, self.tile_name))
             return False
 
@@ -47,12 +49,22 @@ class Tile:
         return True
 
     def validate_terrain(self):
-        # May not exist (e.g. Water only tile)
-        if not os.path.isdir(f"{self.tile_dir}/terrain"):
-            # TODO: need to check if this is, indeed, okay
-            return True
+        no_errors_found = True
+        path = os.path.join(self.tile_dir, "terrain")
 
-        return True
+        # May not exist (e.g. Water only tile)
+        if os.path.isdir(path):
+            for terrain_file in os.listdir(path):
+                texture_file = os.path.basename(
+                    re.search("../textures/(.+\.dds)", open(os.path.join(path, terrain_file)).read())[0])
+                texture_path = os.path.join(self.tile_dir, "textures", texture_file)
+
+                if not os.path.exists(texture_path):
+                    no_errors_found = False
+                    self.errors.append(
+                        "Terrain for Tile {} points to {}, which does not exist".format(self.tile_name, texture_file))
+
+        return no_errors_found
 
     def validate_textures(self):
         if not self.validate_dir("textures"):
