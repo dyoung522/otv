@@ -1,10 +1,17 @@
+import atexit
 import colorama as color
 import os
+import sys
 
 from .argparse import ArgParse
 from .globals import *
 from .ortho import Tile
 from .util import *
+
+
+# Called during sys.exit()
+def cleanup():
+    color.deinit()  # Colorama
 
 
 # Main
@@ -13,14 +20,14 @@ def main():
     errors = []
     tile_count = 0
 
+    atexit.register(cleanup)
+
     color.init(autoreset=True)  # Colorama
 
     argparse = ArgParse(epilog=VERSION_STR, prog=PROGRAM)
 
     args = argparse.args
     help_message = argparse.help
-
-    if args.quiet: args.verbosity = 0
 
     verbose = args.verbosity > 0
 
@@ -66,6 +73,4 @@ def main():
         for error in errors:
             if verbose: log("  -> {}".format(error))
 
-    color.deinit()  # Colorama
-
-    exit(err_count)
+    sys.exit(err_count)

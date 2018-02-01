@@ -23,3 +23,5 @@ class ArgParse:
 
         self.args = parser.parse_args()
         self.help = parser.format_help()
+
+        if self.args.quiet: self.args.verbosity = 0

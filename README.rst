@@ -15,6 +15,6 @@ ____________
 
     $ pip install otv
 
-This will install an `otv` script, so if your PATH is setup correctly you
-should be able to simply run `otv` from your system's command line.
+This will install a script named **otv**, so if your PATH is setup correctly you
+should be able to simply run ``otv`` from your system's command line.
 
