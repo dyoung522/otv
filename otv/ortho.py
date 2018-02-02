@@ -30,21 +30,21 @@ class Tile:
     def validate_dir(self, dir):
         path = os.path.join(self.tile_dir, dir)
 
-        if self.verbose > 1: print("  Validating {:.<35} ".format(dir.upper() + " directory"), end="")
+        if self.verbose > 2: print("  Validating {:.<35} ".format(dir.upper() + " directory"), end="")
 
         if not os.path.isdir(path):
             if dir != "terrain":
-                if self.verbose > 1: print(color.Fore.RED + "NOT FOUND")
+                if self.verbose > 2: print(color.Fore.RED + "NOT FOUND")
                 self.errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
 
             return False
 
         if not os.listdir(path):
-            if self.verbose > 1: print(color.Fore.RED + "IS EMPTY")
+            if self.verbose > 2: print(color.Fore.RED + "IS EMPTY")
             self.errors.append("Directory \"{}\" for Tile {} IS EMPTY".format(dir, self.tile_name))
             return False
 
-        if self.verbose > 1: print(color.Fore.GREEN + "OKAY")
+        if self.verbose > 2: print(color.Fore.GREEN + "OKAY")
 
         return True
 
@@ -60,38 +60,37 @@ class Tile:
 
         self.textures = dict(terrain_check=True)
 
-        valid_dir = self.validate_dir("terrain")
-
-        if self.verbose > 1:
-            print("  Validating {:.<35} ".format("TERRAIN DATA"), end=(os.linesep if self.verbose > 2 else ""))
-
         # May not exist (e.g. Water only tile)
         # if os.path.isdir(path):
-        if valid_dir:
-            for terrain_file in os.listdir(path):
+        if not self.validate_dir("terrain"):
+            self.water_only = True
+            if self.verbose > 2: print(color.Fore.YELLOW + "Water Only? (if Textures are okay, this is safe to ignore)")
+            return True
 
-                if self.verbose > 2: print("    Checking {:.<35} ".format(terrain_file), end="")
+        if self.verbose > 2:
+            print("  Validating {:.<35} ".format("TERRAIN DATA"), end=(os.linesep if self.verbose > 3 else ""))
 
-                texture_file = os.path.basename(
-                    re.search("../textures/(.+\.dds)", open(os.path.join(path, terrain_file)).read())[0])
+        for terrain_file in sorted(os.listdir(path)):
 
-                texture_path = os.path.join(self.tile_dir, "textures", texture_file)
+            if self.verbose > 3: print("    Checking {:.<35} ".format(terrain_file), end="")
 
-                if not os.path.exists(texture_path):
-                    no_errors_found = False
-                    if self.verbose > 2: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
+            texture_file = os.path.basename(
+                re.search("../textures/(.+\.dds)", open(os.path.join(path, terrain_file)).read())[0])
+
+            texture_path = os.path.join(self.tile_dir, "textures", texture_file)
+
+            if not os.path.exists(texture_path):
+                no_errors_found = False
+                if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
+                if texture_file not in self.textures:
                     self.errors.append(
                         "Terrain for Tile {} points to {}, which does not exist".format(self.tile_name, texture_file))
-                else:
-                    if self.verbose > 2: print(color.Fore.GREEN + "OKAY")
+            else:
+                if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
 
-                self.textures[texture_file] = None
+            self.textures[texture_file] = None
 
-        else:
-            self.water_only = True
-            if self.verbose > 1: print(color.Fore.YELLOW + "Water Only? (if Textures are okay, this is safe to ignore)")
-
-        if 1 < self.verbose <= 2:
+        if 2 < self.verbose <= 3:
             if no_errors_found:
                 print(color.Fore.GREEN + "OKAY")
             else:
@@ -100,6 +99,7 @@ class Tile:
         return no_errors_found
 
     def validate_textures(self):
+        texture_count = 0
         no_errors_found = True
         path = os.path.join(self.tile_dir, "textures")
 
@@ -107,16 +107,21 @@ class Tile:
 
         if "terrain_check" not in self.textures: raise RuntimeError("Textures called before Terrains")
 
-        if self.verbose > 1:
-            print("  Validating {:.<35} ".format("TEXTURES DATA"), end=(os.linesep if self.verbose > 2 else ""))
+        if self.verbose > 2:
+            print("  Validating {:.<35} ".format("TEXTURES DATA"), end=(os.linesep if self.verbose > 3 else ""))
 
-        for texture_file in os.listdir(path):
+        for texture_file in sorted(os.listdir(path)):
             if re.match(".*\.dds", texture_file) is None: continue
 
-            if self.verbose > 2: print("    Checking {:.<35} ".format(texture_file), end="")
+            texture_count += 1
+
+            if self.verbose > 3: print("    Checking {:.<35} ".format(texture_file), end="")
 
             if texture_file not in self.textures:
-                if self.verbose > 2: print(color.Fore.RED + "ERROR")
+                no_errors_found = False
+
+                if self.verbose > 3: print(color.Fore.RED + "ERROR")
+
                 if self.water_only:
                     self.errors.append(
                         "Textures were found, but no TERRAIN directory exists for {}".format(self.tile_name))
@@ -124,11 +129,16 @@ class Tile:
                 else:
                     self.errors.append(
                         "Texture file {} exists, but was not referenced by {}".format(texture_file, self.tile_name))
-                no_errors_found = False
             else:
-                if self.verbose > 2: print(color.Fore.GREEN + "OKAY")
+                if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
 
-        if 1 < self.verbose <= 2:
+        if texture_count == 0 and self.verbose > 3:
+            if self.water_only:
+                print("    {:.<44} {}".format("Water Only Tile", color.Fore.GREEN + "OKAY"))
+            else:
+                print("    {:.<44} {}".format("NO TEXTURE DATA", color.Fore.RED + "ERROR"))
+
+        if 2 < self.verbose <= 3:
             if no_errors_found:
                 print(color.Fore.GREEN + "OKAY")
             else:

@@ -18,6 +18,7 @@ def cleanup():
 
 def main():
     errors = []
+    bad_tiles = {}
     tile_count = 0
 
     atexit.register(cleanup)
@@ -30,7 +31,10 @@ def main():
     help_message = argparse.help
 
     tile_dir = os.path.join(args.tile_directory, "Tiles")
-    verbose = args.verbosity > 0
+
+    vquiet = args.verbosity == 0
+    vnormal = args.verbosity >= 1
+    verbose = args.verbosity > 1
 
     if not os.path.isdir(args.tile_directory):
         usage(help_message,
@@ -46,31 +50,53 @@ def main():
 
     os.chdir(args.tile_directory)
 
-    if verbose: print(VERSION_STR + os.linesep)
+    if not vquiet: print(VERSION_STR + os.linesep)
 
+    if vnormal:
+        print(color.Fore.LIGHTCYAN_EX + "Analyzing Tiles... this may take some time, please wait...")
+        print("(Optionally, you can CTRL-C now and use the --verbose option to see the progress)")
+        
     # Run the validations for each Tile
-    for tile in os.listdir(tile_dir):
+    for tile in sorted(os.listdir(tile_dir)):
         tile_count += 1
         err_count = len(errors)
 
         if verbose:
-            print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 1 else ""))
-            
+            print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 2 else ""))
+
         errors.extend(Tile(tile, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
-            if args.verbosity == 1: print(color.Fore.GREEN + "OKAY")
+            if args.verbosity == 2: print(color.Fore.GREEN + "OKAY")
         else:
-            if args.verbosity == 1: print(color.Fore.RED + "ERROR")
+            if args.verbosity == 2: print(color.Fore.RED + "ERROR")
+            bad_tiles[tile] = (len(errors) - err_count)
 
-    if verbose: print(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
+    if vnormal:
+        err_count = len(errors)
+        
+        print(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
-    err_count = len(errors)
-    if err_count == 0:
-        if verbose: print(color.Fore.LIGHTGREEN_EX + "All OKAY")
-    else:
-        if verbose: print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
-        for error in errors:
-            if verbose: print("  -> {}".format(error))
+        if err_count == 0:
+            print(color.Fore.LIGHTGREEN_EX + "All OKAY")
+        else:
+            bad_tiles_count = len(bad_tiles)
+            bad_tiles_string = pluralize(bad_tiles_count, "tile")
+            err_count_string = pluralize(err_count, "error")
+
+            print(color.Fore.LIGHTRED_EX + "Found {} with {} in total".format(
+                bad_tiles_string, err_count_string
+            ))
+
+            with open("{}.error.log".format(PROGRAM_SHORT), "w") as f:
+                print(os.linesep + "{} written to {}".format(err_count_string, f.name))
+                for error in errors: f.write(error)
+
+            print(os.linesep + "{} need attention".format(bad_tiles_string))
+            for (bad_tile_name, bad_tile_count) in bad_tiles.items():
+                print("  -> {} ({})".format(
+                    color.Fore.LIGHTWHITE_EX + bad_tile_name, pluralize(bad_tile_count, "error")),
+                    file=sys.stderr
+                )
 
     sys.exit(err_count)
