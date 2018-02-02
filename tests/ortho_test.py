@@ -54,15 +54,3 @@ def test__validate_dir_returns_false_with_empty_valid_dir(tile, monkeypatch):
     assert (tile.validate_dir(".")) is False
     assert (len(tile.errors)) == 1
     assert ("IS EMPTY" in tile.errors[0])
-
-def test_validate_earth_nav_data(tile):
-    pytest.skip("TBD")
-
-def test_validate_terrain(tile):
-    pytest.skip("TBD")
-
-def test_validate_textures(tile):
-    pytest.skip("TBD")
-
-
-

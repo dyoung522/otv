@@ -46,19 +46,16 @@ def main():
 
     os.chdir(args.tile_directory)
 
-    if verbose: print(VERSION_STR)
+    if verbose: print(VERSION_STR + os.linesep)
 
     # Run the validations for each Tile
     for tile in os.listdir(tile_dir):
         tile_count += 1
         err_count = len(errors)
 
-        if verbose: print(os.linesep + "Analyzing Tile ", end="")
-        if args.verbosity == 1:
-            print("{:.<25} ".format(tile), end="")
-        else:
-            if verbose: print("{}".format(tile))
-
+        if verbose:
+            print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 1 else ""))
+            
         errors.extend(Tile(tile, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
