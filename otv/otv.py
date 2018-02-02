@@ -33,7 +33,7 @@ def main():
     tile_dir = os.path.join(args.tile_directory, "Tiles")
 
     vquiet = args.verbosity == 0
-    vnormal = args.verbosity >= 1
+    vnormal = args.verbosity == 1
     verbose = args.verbosity > 1
 
     if not os.path.isdir(args.tile_directory):
@@ -48,23 +48,23 @@ def main():
               args.verbosity
               )
 
-    os.chdir(args.tile_directory)
-
     if not vquiet: print(VERSION_STR + os.linesep)
 
     if vnormal:
+        # ToDo: Create a progress bar for this
         print(color.Fore.LIGHTCYAN_EX + "Analyzing Tiles... this may take some time, please wait...")
         print("(Optionally, you can CTRL-C now and use the --verbose option to see the progress)")
-        
+
     # Run the validations for each Tile
     for tile in sorted(os.listdir(tile_dir)):
         tile_count += 1
         err_count = len(errors)
 
         if verbose:
+            if args.verbosity > 2: print()
             print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 2 else ""))
 
-        errors.extend(Tile(tile, verbose=args.verbosity).validate())
+        errors.extend(Tile(tile, dir=tile_dir, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
             if args.verbosity == 2: print(color.Fore.GREEN + "OKAY")
@@ -72,9 +72,9 @@ def main():
             if args.verbosity == 2: print(color.Fore.RED + "ERROR")
             bad_tiles[tile] = (len(errors) - err_count)
 
-    if vnormal:
-        err_count = len(errors)
-        
+    err_count = len(errors)
+
+    if args.verbosity > 0:
         print(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
         if err_count == 0:
@@ -90,9 +90,9 @@ def main():
 
             with open("{}.error.log".format(PROGRAM_SHORT), "w") as f:
                 print(os.linesep + "{} written to {}".format(err_count_string, f.name))
-                for error in errors: f.write(error)
+                for error in errors: f.write(error + os.linesep)
 
-            print(os.linesep + "{} need attention".format(bad_tiles_string))
+            print(os.linesep + "{} need attention".format(bad_tiles_string), file=sys.stderr)
             for (bad_tile_name, bad_tile_count) in bad_tiles.items():
                 print("  -> {} ({})".format(
                     color.Fore.LIGHTWHITE_EX + bad_tile_name, pluralize(bad_tile_count, "error")),

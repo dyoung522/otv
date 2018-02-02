@@ -13,9 +13,9 @@ class Tile:
     water_only = False
     opts = {}
 
-    def __init__(self, tile, **opts):
+    def __init__(self, tile, dir, **opts):
         self.tile_name = tile
-        self.tile_dir = os.path.join("Tiles", self.tile_name)
+        self.tile_dir = os.path.join(dir, self.tile_name)
         (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
         self.verbose = opts["verbose"] if "verbose" in opts else 0
         self.errors = list()
@@ -123,6 +123,9 @@ class Tile:
                 if self.verbose > 3: print(color.Fore.RED + "ERROR")
 
                 if self.water_only:
+                    if 2 < self.verbose <= 3:
+                        print(color.Fore.RED + "ERROR")
+                        
                     self.errors.append(
                         "Textures were found, but no TERRAIN directory exists for {}".format(self.tile_name))
                     return False  # no need to check the remaining files
