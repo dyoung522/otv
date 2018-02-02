@@ -46,7 +46,7 @@ def main():
 
     if tiles_count == 0:
         usage(help_message,
-              "\"{}\" does not appear to be a valid Ortho4XP directory, or if it is, I cannot find any Tiles."
+              "\"{}\" does not appear to be a valid Ortho4XP Tiles directory, or if it is, I cannot find any Tiles."
               .format(tiles_dir))
 
     if not vquiet: print(VERSION_STR + os.linesep)

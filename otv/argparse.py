@@ -10,6 +10,8 @@ class ArgParse:
 
         # Positional Arguments
         parser.add_argument("tile_directory",
+                            nargs="?",
+                            default=".",
                             help="Directory where Tiles are stored (usually your Ortho4XP dir)")
 
         # Optional Arguments
