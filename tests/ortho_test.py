@@ -9,7 +9,7 @@ tile_name = f"zOrtho_{lat}{long}"
 
 @pytest.fixture
 def tile():
-    return Tile(tile_name)
+    return Tile(tile_name, dir=".")
 
 
 def test_tile_name(tile):

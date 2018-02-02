@@ -17,8 +17,8 @@ def pluralize(count, singular, plural=None):
     return "{} {}".format(count, plural)
 
 
-def usage(help_message, error_message="", verbosity=1):
+def usage(help_message, error_message=""):
     if error_message != "": print(color.Fore.RED + color.Style.BRIGHT + f"!!! {error_message} !!!\n", file=sys.stderr)
-    if verbosity > 0: print(help_message)
+    print(help_message)
 
     sys.exit(255)

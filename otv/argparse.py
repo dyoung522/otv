@@ -24,4 +24,6 @@ class ArgParse:
         self.args = parser.parse_args()
         self.help = parser.format_help()
 
+        self.args.tile_directory = self.args.tile_directory.rstrip("/\\")
+
         if self.args.quiet: self.args.verbosity = 0

@@ -19,7 +19,6 @@ def cleanup():
 def main():
     errors = []
     bad_tiles = {}
-    tile_count = 0
 
     atexit.register(cleanup)
 
@@ -30,23 +29,25 @@ def main():
     args = argparse.args
     help_message = argparse.help
 
-    tile_dir = os.path.join(args.tile_directory, "Tiles")
-
     vquiet = args.verbosity == 0
     vnormal = args.verbosity == 1
     verbose = args.verbosity > 1
 
-    if not os.path.isdir(args.tile_directory):
-        usage(help_message,
-              "Please provide a directory where Ortho4XP Tiles can be found"
-              )
+    if os.path.basename(args.tile_directory) == "Tiles":
+        tiles_dir = args.tile_directory
+    else:
+        tiles_dir = os.path.join(args.tile_directory, "Tiles")
 
-    if not os.path.exists(tile_dir):
+    if not os.path.isdir(tiles_dir):
+        usage(help_message, "Please provide a directory where Ortho4XP Tiles can be found")
+
+    tiles = sorted(os.listdir(tiles_dir))
+    tiles_count = len(tiles)
+
+    if tiles_count == 0:
         usage(help_message,
               "\"{}\" does not appear to be a valid Ortho4XP directory, or if it is, I cannot find any Tiles."
-              .format(args.tile_directory),
-              args.verbosity
-              )
+              .format(tiles_dir))
 
     if not vquiet: print(VERSION_STR + os.linesep)
 
@@ -56,15 +57,14 @@ def main():
         print("(Optionally, you can CTRL-C now and use the --verbose option to see the progress)")
 
     # Run the validations for each Tile
-    for tile in sorted(os.listdir(tile_dir)):
-        tile_count += 1
+    for tile in tiles:
         err_count = len(errors)
 
         if verbose:
             if args.verbosity > 2: print()
             print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 2 else ""))
 
-        errors.extend(Tile(tile, dir=tile_dir, verbose=args.verbosity).validate())
+        errors.extend(Tile(tile, dir=tiles_dir, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
             if args.verbosity == 2: print(color.Fore.GREEN + "OKAY")
@@ -75,7 +75,7 @@ def main():
     err_count = len(errors)
 
     if args.verbosity > 0:
-        print(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
+        print(os.linesep + "Scanned {}... ".format(pluralize(tiles_count, "Tile")), end="")
 
         if err_count == 0:
             print(color.Fore.LIGHTGREEN_EX + "All OKAY")
