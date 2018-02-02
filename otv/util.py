@@ -1,12 +1,7 @@
 import colorama as color
 import sys
 
-__all__ = ["log", "pluralize", "usage"]
-
-
-# Using this so that we may output to a file in the future
-def log(message, **extra_opts):
-    print(message, **extra_opts)
+__all__ = ["pluralize", "usage"]
 
 
 def pluralize(count, singular, plural=None):

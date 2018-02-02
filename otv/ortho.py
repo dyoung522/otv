@@ -10,35 +10,41 @@ class Tile:
     long = None
     tile_dir = None
     tile_name = None
+    water_only = False
     opts = {}
-    errors = []
 
     def __init__(self, tile, **opts):
         self.tile_name = tile
         self.tile_dir = os.path.join("Tiles", self.tile_name)
         (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
-        self.opts["verbose"] = opts["verbose"] if "verbose" in opts else 0
+        self.verbose = opts["verbose"] if "verbose" in opts else 0
+        self.errors = list()
+        self.textures = dict()
 
     def validate(self):
         for dir in self.DIRECTORIES:
-            if self.opts["verbose"] > 1: print("  directory {:.<20}".format(dir), end="")
-            if getattr(self, "validate_{}".format(re.sub("\s+", "_", dir)))():
-                if self.opts["verbose"] > 1: print(color.Fore.GREEN + " OKAY")
-            else:
-                if self.opts["verbose"] > 1: print(color.Fore.RED + " ERROR")
+            getattr(self, "validate_{}".format(re.sub("\s+", "_", dir)))()
 
         return self.errors
 
     def validate_dir(self, dir):
         path = os.path.join(self.tile_dir, dir)
 
+        if self.verbose > 1: print("  Validating {:.<35} ".format(dir.upper() + " directory"), end="")
+
         if not os.path.isdir(path):
-            self.errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
+            if dir != "terrain":
+                if self.verbose > 1: print(color.Fore.RED + "NOT FOUND")
+                self.errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
+
             return False
 
         if not os.listdir(path):
+            if self.verbose > 1: print(color.Fore.RED + "IS EMPTY")
             self.errors.append("Directory \"{}\" for Tile {} IS EMPTY".format(dir, self.tile_name))
             return False
+
+        if self.verbose > 1: print(color.Fore.GREEN + "OKAY")
 
         return True
 
@@ -52,22 +58,60 @@ class Tile:
         no_errors_found = True
         path = os.path.join(self.tile_dir, "terrain")
 
+        self.textures = dict(terrain_check=True)
+
         # May not exist (e.g. Water only tile)
-        if os.path.isdir(path):
+        # if os.path.isdir(path):
+        if self.validate_dir("terrain"):
             for terrain_file in os.listdir(path):
+
+                if self.verbose > 3: print("    Checking {:.<35} ".format(terrain_file), end="")
+
                 texture_file = os.path.basename(
                     re.search("../textures/(.+\.dds)", open(os.path.join(path, terrain_file)).read())[0])
+
                 texture_path = os.path.join(self.tile_dir, "textures", texture_file)
 
                 if not os.path.exists(texture_path):
+                    if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
                     no_errors_found = False
                     self.errors.append(
                         "Terrain for Tile {} points to {}, which does not exist".format(self.tile_name, texture_file))
+                else:
+                    if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
+
+                self.textures[texture_file] = None
+
+        else:
+            self.water_only = True
+            if self.verbose > 1: print(color.Fore.YELLOW + "Water Only? (if Textures are okay, this is safe to ignore)")
 
         return no_errors_found
 
     def validate_textures(self):
-        if not self.validate_dir("textures"):
-            return False
+        no_errors_found = True
+        path = os.path.join(self.tile_dir, "textures")
 
-        return True
+        if not self.validate_dir("textures"): return False
+
+        if "terrain_check" not in self.textures: raise RuntimeError("Textures called before Terrains")
+
+        for texture_file in os.listdir(path):
+            if re.match(".*\.dds", texture_file) is None: continue
+
+            if self.verbose > 3: print("    Checking {:.<35} ".format(texture_file), end="")
+
+            if texture_file not in self.textures:
+                if self.verbose > 3: print(color.Fore.RED + "ERROR")
+                if self.water_only:
+                    self.errors.append(
+                        "Textures were found, but no TERRAIN directory exists for {}".format(self.tile_name))
+                    return False  # no need to check the remaining files
+                else:
+                    self.errors.append(
+                        "Texture file {} exists, but was not referenced by {}".format(texture_file, self.tile_name))
+                no_errors_found = False
+            else:
+                if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
+
+        return no_errors_found

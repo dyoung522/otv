@@ -46,34 +46,34 @@ def main():
 
     os.chdir(args.tile_directory)
 
-    if verbose: log(VERSION_STR)
+    if verbose: print(VERSION_STR)
 
     # Run the validations for each Tile
     for tile in os.listdir(tile_dir):
         tile_count += 1
         err_count = len(errors)
 
-        if verbose: log(os.linesep + "Analyzing Tile ", end="")
+        if verbose: print(os.linesep + "Analyzing Tile ", end="")
         if args.verbosity == 1:
-            log("{:.<25} ".format(tile), end="")
+            print("{:.<25} ".format(tile), end="")
         else:
-            if verbose: log("{}".format(tile))
+            if verbose: print("{}".format(tile))
 
         errors.extend(Tile(tile, verbose=args.verbosity).validate())
 
         if len(errors) == err_count:
-            if args.verbosity == 1: log(color.Fore.GREEN + "OKAY")
+            if args.verbosity == 1: print(color.Fore.GREEN + "OKAY")
         else:
-            if args.verbosity == 1: log(color.Fore.RED + "ERROR")
+            if args.verbosity == 1: print(color.Fore.RED + "ERROR")
 
-    if verbose: log(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
+    if verbose: print(os.linesep + "Scanned {}... ".format(pluralize(tile_count, "Tile")), end="")
 
     err_count = len(errors)
     if err_count == 0:
-        if verbose: log(color.Fore.LIGHTGREEN_EX + "All OKAY")
+        if verbose: print(color.Fore.LIGHTGREEN_EX + "All OKAY")
     else:
-        if verbose: log(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
+        if verbose: print(color.Fore.LIGHTRED_EX + "Found {}:".format(pluralize(err_count, "Error")))
         for error in errors:
-            if verbose: log("  -> {}".format(error))
+            if verbose: print("  -> {}".format(error))
 
     sys.exit(err_count)
