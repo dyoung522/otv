@@ -56,13 +56,14 @@ def main():
     if vnormal:
         print(color.Fore.LIGHTCYAN_EX + "Analyzing {} Tiles... this may take some time, please wait...".format(
             tiles_count))
-        t = tqdm(total=tiles_count, unit="tiles", leave=True)
+        if args.progress_bar:
+            t = tqdm(total=tiles_count, unit="tiles", leave=True)
 
     # Run the validations for each Tile
     for tile in tiles:
         err_count = len(errors)
 
-        if vnormal:
+        if vnormal and args.progress_bar:
             t.update(1)
 
         if verbose:
@@ -80,7 +81,9 @@ def main():
     err_count = len(errors)
 
     if args.verbosity > 0:
-        if vnormal: t.close()
+        if vnormal and args.progress_bar:
+            t.close()
+
         print(os.linesep + "Scanned {}... ".format(pluralize(tiles_count, "Tile")), end="")
 
         if err_count == 0:

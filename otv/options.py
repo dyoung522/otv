@@ -28,9 +28,14 @@ class ArgParse:
 
         parser.add_argument("-V", "--version", action="version", version=opts["epilog"])
 
+        parser.add_argument("--no-progress", dest="progress_bar", action="store_false", default=True,
+                            help="Disables the progress bar display")
+
         self.args = parser.parse_args()
         self.help = parser.format_help()
 
         self.args.tile_directory = self.args.tile_directory.rstrip("/\\")
 
-        if self.args.quiet: self.args.verbosity = 0
+        if self.args.quiet:
+            self.args.verbosity = 0
+            self.progress_bar = False
