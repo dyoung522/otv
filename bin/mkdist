@@ -9,6 +9,10 @@ else
     sleep 5
 fi
 
+echo "Converting README.md to README.rst (for PyPi)"
+pandoc README.md -t rst > README.rst
+
+echo "Creating distribution files in dist"
 python setup.py sdist bdist_wheel
 gpg --detach-sign -a dist/otv-*.tar.gz
 
