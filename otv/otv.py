@@ -2,6 +2,7 @@ import atexit
 import colorama as color
 import os
 import sys
+from tqdm import tqdm
 
 from .options import ArgParse
 from .globals import *
@@ -19,6 +20,7 @@ def cleanup():
 def main():
     errors = []
     bad_tiles = {}
+    tile_count = 0
 
     atexit.register(cleanup)
 
@@ -52,13 +54,16 @@ def main():
     if not vquiet: print(VERSION_STR + os.linesep)
 
     if vnormal:
-        # ToDo: Create a progress bar for this
-        print(color.Fore.LIGHTCYAN_EX + "Analyzing Tiles... this may take some time, please wait...")
-        print("(Optionally, you can CTRL-C now and use the --verbose option to see the progress)")
+        print(color.Fore.LIGHTCYAN_EX + "Analyzing {} Tiles... this may take some time, please wait...".format(
+            tiles_count))
+        t = tqdm(total=tiles_count, unit="tiles", leave=True)
 
     # Run the validations for each Tile
     for tile in tiles:
         err_count = len(errors)
+
+        if vnormal:
+            t.update(1)
 
         if verbose:
             if args.verbosity > 2: print()
@@ -75,6 +80,7 @@ def main():
     err_count = len(errors)
 
     if args.verbosity > 0:
+        if vnormal: t.close()
         print(os.linesep + "Scanned {}... ".format(pluralize(tiles_count, "Tile")), end="")
 
         if err_count == 0:
