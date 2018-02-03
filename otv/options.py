@@ -1,4 +1,5 @@
 import argparse
+import os
 
 
 class ArgParse:
@@ -12,16 +13,20 @@ class ArgParse:
         parser.add_argument("tile_directory",
                             nargs="?",
                             default=".",
-                            help="Directory where Tiles are stored (usually your Ortho4XP dir)")
+                            help="Directory where Tiles are stored (usually your Ortho4XP dir) - " +
+                                 "If not provided; use the current directory")
 
         # Optional Arguments
-        parser.add_argument("-V", "--version", action="version", version=opts["epilog"])
+        parser.add_argument("-P", "--pause", action="store_true",
+                            help="Pause the program before exiting (good for batch files)")
 
         group = parser.add_mutually_exclusive_group()
+        group.add_argument("-q", "--quiet", action="store_true",
+                           help="Suppresses all output; exit value indicates errors found")
         group.add_argument("-v", "--verbose", dest="verbosity", action="count", default=1,
                            help="Increase output verbosity (may be repeated)")
-        group.add_argument("-q", "--quiet", action="store_true",
-                           help="Suppresses all output; exit value indicates errors found.")
+
+        parser.add_argument("-V", "--version", action="version", version=opts["epilog"])
 
         self.args = parser.parse_args()
         self.help = parser.format_help()

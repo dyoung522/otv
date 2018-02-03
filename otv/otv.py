@@ -3,7 +3,7 @@ import colorama as color
 import os
 import sys
 
-from .argparse import ArgParse
+from .options import ArgParse
 from .globals import *
 from .ortho import Tile
 from .util import *
@@ -99,4 +99,10 @@ def main():
                     file=sys.stderr
                 )
 
+    if args.pause:
+        input(os.linesep + "Press ENTER key to exit")
+
     sys.exit(err_count)
+
+
+if __name__ == "__main__": main()
