@@ -21,22 +21,46 @@ install::
 
     $ pip3 install otv
 
-This will install an executable named **otv**, so if your PATH is setup
-correctly you should be able to simply run ``otv`` from your system's command line.
+Otherwise, head over to GitHub_ or PyPi_ and download the latest release.
 
 
 Getting Started
 ---------------
 
-It's written in python (which is also a dependency of Ortho4XP) so, assuming you
-have a working python installation, simply run pip3 install otv - that will
-create a command line utility for you named otv.
+There are three ways to run the program:
 
-Running otv without any additional arguments will give you a help message, but
-to jump right into it, give it your Ortho4XP directory and it'll start scanning:
-e.g: ``otv path_to_your_ortho4XP_directory``
+#. If you installed via the ``pip3`` installer, you'll have an executable named
+   **otv** available, so you should be able to:
 
-There are other options, which you can see with ``otv --help``::
+   #. cd into your Ortho4XP directory
+   #. run ``otv``
+
+#. Download the latest release from PyPi_ or GitHub_ and extract it into a
+   folder. From the command line, run::
+
+    python3 bin/ovt YourOrtho4XPdir
+
+   *(Obviously; change "YourOrtho4XPdir" to wherever you've stored your
+   Ortho Tiles)*
+
+#. If you're on windows, and prefer an EXE, download the latest release from
+   the GitHub_ Releases page, then:
+
+   #. Extract and unzip ``bin/otv.exe.zip`` (save it anywhere)
+   #. Create a shortcut to the unzipped ``otv.exe`` on your desktop
+      (**must** be a shortcut).
+   #. Go to the *Properties* of the shortcut and change the "Start In" field to
+      point to your Ortho4XP directory.
+   #. In the Target field, add a " -P" on the end of the command
+      (i.e. "... otv.exe -P") - along with any other options you would like.
+
+   Then you can simply double click the shortcut to run the utility anytime.
+
+
+More Info
+---------
+
+- Running otv without any additional arguments will give you a help message::
 
     usage: Ortho4XP Tile Validator [-h] [-P] [-q | -v] [-V] [tile_directory]
 
@@ -53,21 +77,17 @@ There are other options, which you can see with ``otv --help``::
       -v, --verbose   Increase output verbosity (may be repeated)
       -V, --version   show program's version number and exit
 
-More Info
----------
+- Currently, it checks for things like:
 
-Currently, it'll check for things like:
+  - missing or empty data directories (Earth Nav Data, Terrain, Textures)
+  - missing references to textures from each terrain file
+  - textures which exist but aren't referenced from a terrain
 
-- missing or empty data directories (Earth Nav Data, Terrain, Textures)
-- missing references to textures from each terrain file
-- textures which exist but aren't referenced from a terrain
+- You can find the pip page on PyPi_ and the source code on GitHub_ (both
+  provide package downloads)
 
-You can find the `pip page here <https://pypi.python.org/pypi/otv>`_
-and the `source code here <https://github.com/dyoung522/otv>`_
-
-Both provide downloads if you don't have a working pip, or prefer to install
-from the package.
-
-It's currently in beta, so if you're interested, please try it out and let me
+OTV is currently in beta, so if you're interested, please try it out and let me
 know how it works for you. I would appreciate any feedback and/or bug reports.
 
+.. _PyPi: https://pypi.python.org/pypi/otv
+.. _GitHub: https://github.com/dyoung522/otv
