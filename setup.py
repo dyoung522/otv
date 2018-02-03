@@ -6,13 +6,13 @@ from setuptools import setup, find_packages
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
     name="otv",
     version=VERSION,
-    license='MIT',
+    license="MIT",
 
     description="Ortho4XP Tile Validator",
     long_description=long_description,
@@ -35,8 +35,11 @@ setup(
     ],
     keywords=["ortho4xp", "x-plane"],
 
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['colorama'],
-    entry_points={'console_scripts': ['otv=otv:main']},
-)
+    packages=find_packages(exclude=["contrib", "docs", "tests*"]),
+    include_package_data=True,
 
+    install_requires=["colorama"],
+    python_requires=">=3",
+
+    entry_points={"console_scripts": ["otv=otv:main"]},
+)

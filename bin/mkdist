@@ -2,5 +2,13 @@
 
 rm -rf build/*
 
+if [ -e "dist/otv.exe" ] ; then
+    mv dist/otv.exe bin/otv.exe
+else
+    echo "Please build the windows exe first - CTRL-C now to exit"
+    sleep 5
+fi
+
 python setup.py sdist bdist_wheel
 gpg --detach-sign -a dist/otv-*.tar.gz
+

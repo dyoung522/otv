@@ -1,0 +1,6 @@
+# Include the license and README files
+include LICENSE.txt README.rst
+
+# Include the binary files
+include bin/otv bin/otv.exe
+
