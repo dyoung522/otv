@@ -21,8 +21,7 @@ def cleanup():
 # Main
 
 def main():
-    errors = []
-    bad_tiles = {}
+    tile_errors = dict()
     ortho_pattern = re.compile("zOrtho4XP_([+-]\d+){2}")
 
     atexit.register(cleanup)
@@ -69,23 +68,21 @@ def main():
 
     # Run the validations for each Tile
     for tile in tiles:
-        err_count = len(errors)
-
         if vnormal and args.progress_bar: t.update(1)
 
         if verbose:
             if args.verbosity > 2: print()
             print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 2 else ""))
 
-        errors.extend(Tile(tile, dir=tiles_dir, verbose=args.verbosity).validate())
+        tile_errors[tile] = Tile(tile, dir=tiles_dir, verbose=args.verbosity).validate()
 
-        if len(errors) == err_count:
+        if len(tile_errors[tile]) == 0:
             if args.verbosity == 2: print(color.Fore.GREEN + "OKAY")
+            tile_errors.pop(tile)
         else:
             if args.verbosity == 2: print(color.Fore.RED + "ERROR")
-            bad_tiles[tile] = (len(errors) - err_count)
 
-    err_count = len(errors)
+    err_count = len(tile_errors.values())
 
     if args.verbosity > 0:
         if vnormal and args.progress_bar:
@@ -96,7 +93,7 @@ def main():
         if err_count == 0:
             print(color.Fore.LIGHTGREEN_EX + "All OKAY")
         else:
-            bad_tiles_count = len(bad_tiles)
+            bad_tiles_count = len(tile_errors.values())
             bad_tiles_string = pluralize(bad_tiles_count, "tile")
             err_count_string = pluralize(err_count, "error")
 
@@ -104,16 +101,13 @@ def main():
                 bad_tiles_string, err_count_string
             ))
 
-            print(os.linesep + "{}:".format(err_count_string), file=sys.stderr)
-            for error in errors:
-                print("  -> {}".format(color.Fore.LIGHTRED_EX + error), file=sys.stderr)
-
-            print(os.linesep + "{} need attention:".format(bad_tiles_string), file=sys.stderr)
-            for (bad_tile_name, bad_tile_count) in bad_tiles.items():
-                print("  -> {} ({})".format(
-                    color.Fore.LIGHTWHITE_EX + bad_tile_name, pluralize(bad_tile_count, "error")),
-                    file=sys.stderr
-                )
+            print(os.linesep + "{} need attention:".format(bad_tiles_string) + os.linesep, file=sys.stderr)
+            for tile, errors in tile_errors.items():
+                print("  {}".format(color.Fore.LIGHTWHITE_EX + tile), file=sys.stderr)
+                if verbose:
+                    for error in errors:
+                        print("    -> {}".format(color.Fore.LIGHTRED_EX + error), file=sys.stderr)
+                    print()
 
     if args.pause or (platform.system() == "Windows"):
         input(os.linesep + "Press ENTER key to exit")

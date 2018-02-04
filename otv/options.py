@@ -22,7 +22,7 @@ class ArgParse:
         verbose_group = output_group.add_mutually_exclusive_group()
         verbose_group.add_argument("-q", "--quiet", action="store_true",
                                    help="Suppresses all output; exit value indicates errors found")
-        verbose_group.add_argument("-v", "--verbose", dest="verbosity", action="count", default=1,
+        verbose_group.add_argument("-v", "-V", "--verbose", dest="verbosity", action="count", default=1,
                                    help="Increase verbosity (repeat to increase verbosity more)")
 
         defaults_group = parser.add_argument_group("alter defaults")

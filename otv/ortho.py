@@ -35,13 +35,13 @@ class Tile:
         if not os.path.isdir(path):
             if dir != "terrain":
                 if self.verbose > 2: print(color.Fore.RED + "NOT FOUND")
-                self.errors.append("Directory \"{}\" for Tile {} NOT FOUND".format(dir, self.tile_name))
+                self.errors.append("Directory \"{}\" NOT FOUND".format(dir))
 
             return False
 
         if not os.listdir(path):
             if self.verbose > 2: print(color.Fore.RED + "IS EMPTY")
-            self.errors.append("Directory \"{}\" for Tile {} IS EMPTY".format(dir, self.tile_name))
+            self.errors.append("Directory \"{}\" IS EMPTY".format(dir))
             return False
 
         if self.verbose > 2: print(color.Fore.GREEN + "OKAY")
@@ -84,7 +84,7 @@ class Tile:
                 if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
                 if texture_file not in self.textures:
                     self.errors.append(
-                        "Terrain for Tile {} points to {}, which does not exist".format(self.tile_name, texture_file))
+                        "Terrain points to {}, which does not exist".format(texture_file))
             else:
                 if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
 
@@ -126,12 +126,11 @@ class Tile:
                     if 2 < self.verbose <= 3:
                         print(color.Fore.RED + "ERROR")
                         
-                    self.errors.append(
-                        "Textures were found, but no TERRAIN directory exists for {}".format(self.tile_name))
+                    self.errors.append("Textures were found, but no TERRAIN directory exists")
                     return False  # no need to check the remaining files
                 else:
                     self.errors.append(
-                        "Texture file {} exists, but was not referenced by {}".format(texture_file, self.tile_name))
+                        "Texture file {} exists, but was not referenced".format(texture_file))
             else:
                 if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
 
