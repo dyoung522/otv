@@ -28,7 +28,7 @@ class ArgParse:
         defaults_group = parser.add_argument_group("alter defaults")
 
         pause_group = defaults_group.add_mutually_exclusive_group()
-        pause_group.add_argument("-P", "--pause", action="store_true",
+        pause_group.add_argument("-p", "-P", "--pause", action="store_true",
                                  help="Pause the program before exiting (default for Windows)")
         pause_group.add_argument("--no-pause", dest="pause", action="store_false",
                                  help="Disable auto-pause")
