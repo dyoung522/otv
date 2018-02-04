@@ -1,6 +1,8 @@
 import atexit
 import colorama as color
+import fnmatch
 import os
+import re
 import sys
 from tqdm import tqdm
 
@@ -20,7 +22,7 @@ def cleanup():
 def main():
     errors = []
     bad_tiles = {}
-    tile_count = 0
+    ortho_pattern = re.compile("zOrtho4XP_([+-]\d+){2}")
 
     atexit.register(cleanup)
 
@@ -35,7 +37,12 @@ def main():
     vnormal = args.verbosity == 1
     verbose = args.verbosity > 1
 
-    if os.path.basename(args.tile_directory) == "Tiles":
+    try:
+        test_file = os.listdir(args.tile_directory)[0]
+    except IndexError:
+        test_file = ""
+
+    if (os.path.basename(args.tile_directory) == "Tiles") or re.match(ortho_pattern, test_file):
         tiles_dir = args.tile_directory
     else:
         tiles_dir = os.path.join(args.tile_directory, "Tiles")
@@ -43,7 +50,7 @@ def main():
     if not os.path.isdir(tiles_dir):
         usage(help_message, "Please provide a directory where Ortho4XP Tiles can be found")
 
-    tiles = sorted(os.listdir(tiles_dir))
+    tiles = [f for f in sorted(os.listdir(tiles_dir)) if re.match(ortho_pattern, f)]
     tiles_count = len(tiles)
 
     if tiles_count == 0:
@@ -63,8 +70,7 @@ def main():
     for tile in tiles:
         err_count = len(errors)
 
-        if vnormal and args.progress_bar:
-            t.update(1)
+        if vnormal and args.progress_bar: t.update(1)
 
         if verbose:
             if args.verbosity > 2: print()
@@ -97,11 +103,11 @@ def main():
                 bad_tiles_string, err_count_string
             ))
 
-            with open("{}.error.log".format(PROGRAM_SHORT), "w") as f:
-                print(os.linesep + "{} written to {}".format(err_count_string, f.name))
-                for error in errors: f.write(error + os.linesep)
+            print(os.linesep + "{}:".format(err_count_string), file=sys.stderr)
+            for error in errors:
+                print("  -> {}".format(color.Fore.LIGHTRED_EX + error), file=sys.stderr)
 
-            print(os.linesep + "{} need attention".format(bad_tiles_string), file=sys.stderr)
+            print(os.linesep + "{} need attention:".format(bad_tiles_string), file=sys.stderr)
             for (bad_tile_name, bad_tile_count) in bad_tiles.items():
                 print("  -> {} ({})".format(
                     color.Fore.LIGHTWHITE_EX + bad_tile_name, pluralize(bad_tile_count, "error")),
