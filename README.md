@@ -89,3 +89,10 @@ There are three ways to run the program:
 OTV is currently in beta, so if you\'re interested, please try it out
 and let me know how it works for you. I would appreciate any feedback
 and/or bug reports.
+
+### Known Issues
+
+- On Windows, the utility will pause after each run, even if running from a
+  command line. This is done because most Windows users will be running the util
+  from a Shortcut, so the pause is necessary without having to specifically add
+  it. You can use the `--no-pause` option to disable this functionality

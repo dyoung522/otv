@@ -1,0 +1,2 @@
+#!env bash
+pyinstaller --console --onefile --noconfirm --clean bin/otv

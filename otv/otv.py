@@ -1,9 +1,10 @@
 import atexit
 import colorama as color
-import fnmatch
 import os
+import platform
 import re
 import sys
+
 from tqdm import tqdm
 
 from .options import ArgParse
@@ -114,7 +115,7 @@ def main():
                     file=sys.stderr
                 )
 
-    if args.pause:
+    if args.pause or (platform.system() == "Windows"):
         input(os.linesep + "Press ENTER key to exit")
 
     sys.exit(err_count)

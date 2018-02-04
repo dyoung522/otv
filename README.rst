@@ -59,8 +59,7 @@ There are three ways to run the program:
    3. Go to the *Properties* of the shortcut and change the "Start In"
       field to point to your Ortho4XP directory.
    4. In the Target field, add a ``--pause`` on the end of the command
-      (i.e. "...exe" –pause) - *note, the option goes outside any
-      existing quotations for the target command*
+      (i.e. "...exe –pause") *note: inside the existing quotations*
 
    Then you can simply double click the shortcut to run the utility
    anytime.
@@ -103,3 +102,12 @@ More Info
 OTV is currently in beta, so if you're interested, please try it out and
 let me know how it works for you. I would appreciate any feedback and/or
 bug reports.
+
+Known Issues
+~~~~~~~~~~~~
+
+-  On Windows, the utility will pause after each run, even if running
+   from a command line. This is done because most Windows users will be
+   running the util from a Shortcut, so the pause is necessary without
+   having to specifically add it. You can use the ``--no-pause`` option
+   to disable this functionality
