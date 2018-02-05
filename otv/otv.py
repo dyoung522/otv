@@ -1,5 +1,6 @@
 import atexit
 import colorama as color
+import itertools
 import os
 import platform
 import re
@@ -82,7 +83,7 @@ def main():
         else:
             if args.verbosity == 2: print(color.Fore.RED + "ERROR")
 
-    err_count = len(tile_errors.values())
+    err_count = len(list(itertools.chain.from_iterable(tile_errors.values())))
 
     if args.verbosity > 0:
         if vnormal and args.progress_bar:
@@ -97,17 +98,16 @@ def main():
             bad_tiles_string = pluralize(bad_tiles_count, "tile")
             err_count_string = pluralize(err_count, "error")
 
-            print(color.Fore.LIGHTRED_EX + "Found {} with {} in total".format(
-                bad_tiles_string, err_count_string
-            ))
+            print(color.Fore.LIGHTRED_EX + "Found {} with a total of {}".format(bad_tiles_string, err_count_string))
 
-            print(os.linesep + "{} need attention:".format(bad_tiles_string) + os.linesep, file=sys.stderr)
+            print(os.linesep +
+                  color.Fore.LIGHTRED_EX +
+                  "{} need attention:".format(bad_tiles_string), file=sys.stderr)
+
             for tile, errors in tile_errors.items():
-                print("  {}".format(color.Fore.LIGHTWHITE_EX + tile), file=sys.stderr)
-                if verbose:
-                    for error in errors:
-                        print("    -> {}".format(color.Fore.LIGHTRED_EX + error), file=sys.stderr)
-                    print()
+                print(os.linesep + "  {}".format(color.Fore.LIGHTWHITE_EX + tile), file=sys.stderr)
+                for error in errors:
+                    print("    -> {}".format(color.Fore.LIGHTRED_EX + error), file=sys.stderr)
 
     if args.pause or (platform.system() == "Windows"):
         input(os.linesep + "Press ENTER key to exit")

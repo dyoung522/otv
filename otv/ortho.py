@@ -74,21 +74,26 @@ class Tile:
 
             if self.verbose > 3: print("    Checking {:.<35} ".format(terrain_file), end="")
 
-            texture_file = os.path.basename(
-                re.search("../textures/(.+\.dds)", open(os.path.join(path, terrain_file)).read())[0])
+            with open(os.path.join(path, terrain_file)) as tf:
+                texture_data = tf.read()
 
-            texture_path = os.path.join(self.tile_dir, "textures", texture_file)
+            try:
+                texture_file = os.path.basename(re.search("../textures/(.+\.dds)", texture_data)[0])
+                texture_path = os.path.join(self.tile_dir, "textures", texture_file)
 
-            if not os.path.exists(texture_path):
+                if not os.path.exists(texture_path):
+                    no_errors_found = False
+                    if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
+                    if texture_file not in self.textures:
+                        self.errors.append("Terrain points to {}, which does not exist".format(texture_file))
+                else:
+                    if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
+
+                self.textures[texture_file] = None
+            except TypeError:
                 no_errors_found = False
-                if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
-                if texture_file not in self.textures:
-                    self.errors.append(
-                        "Terrain points to {}, which does not exist".format(texture_file))
-            else:
-                if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
-
-            self.textures[texture_file] = None
+                if self.verbose > 3: print(color.Fore.RED + "NO TEXTURES FOUND")
+                self.errors.append("Terrain {} does not reference any Textures".format(terrain_file))
 
         if 2 < self.verbose <= 3:
             if no_errors_found:
@@ -125,7 +130,7 @@ class Tile:
                 if self.water_only:
                     if 2 < self.verbose <= 3:
                         print(color.Fore.RED + "ERROR")
-                        
+
                     self.errors.append("Textures were found, but no TERRAIN directory exists")
                     return False  # no need to check the remaining files
                 else:
