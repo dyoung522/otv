@@ -49,7 +49,7 @@ def main():
         tiles_dir = os.path.join(args.tile_directory, "Tiles")
 
     if not os.path.isdir(tiles_dir):
-        usage(help_message, "Please provide a directory where Ortho4XP Tiles can be found")
+        usage(help_message, "Please provide a directory where Ortho4XP Tiles can be found", pause=args.pause)
 
     tiles = [f for f in sorted(os.listdir(tiles_dir)) if re.match(ortho_pattern, f)]
     tiles_count = len(tiles)
@@ -57,7 +57,7 @@ def main():
     if tiles_count == 0:
         usage(help_message,
               "\"{}\" does not appear to be a valid Ortho4XP Tiles directory, or if it is, I cannot find any Tiles."
-              .format(tiles_dir))
+              .format(tiles_dir), pause=args.pause)
 
     if not vquiet: print(VERSION_STR + os.linesep)
 

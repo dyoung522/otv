@@ -38,7 +38,7 @@ setup(
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     include_package_data=True,
 
-    install_requires=["colorama"],
+    install_requires=["colorama", "tqdm"],
     python_requires=">=3",
 
     entry_points={"console_scripts": ["otv=otv:main"]},
