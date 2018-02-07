@@ -2,12 +2,8 @@
 
 rm -rf build/*
 
-if [ -e "dist/otv.exe" ] ; then
-    mv dist/otv.exe bin/otv.exe
-else
-    echo "Please build the windows exe first - CTRL-C now to exit"
-    sleep 5
-fi
+echo "Please build the windows exe first - CTRL-C now to exit"
+sleep 5
 
 echo "Converting README.md to README.rst (for PyPi)"
 pandoc README.md -t rst > README.rst
