@@ -61,7 +61,6 @@ class Tile:
         self.textures = dict(terrain_check=True)
 
         # May not exist (e.g. Water only tile)
-        # if os.path.isdir(path):
         if not self.validate_dir("terrain"):
             self.water_only = True
             if self.verbose > 2: print(color.Fore.YELLOW + "Water Only? (if Textures are okay, this is safe to ignore)")
@@ -77,23 +76,26 @@ class Tile:
             with open(os.path.join(path, terrain_file)) as tf:
                 texture_data = tf.read()
 
-            try:
-                texture_file = os.path.basename(re.search("../textures/(.+\.dds)", texture_data)[0])
-                texture_path = os.path.join(self.tile_dir, "textures", texture_file)
+            textures = re.search("textures/(.+\.dds)", texture_data)
 
-                if not os.path.exists(texture_path):
-                    no_errors_found = False
-                    if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
-                    if texture_file not in self.textures:
-                        self.errors.append("Terrain points to {}, which does not exist".format(texture_file))
-                else:
-                    if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
-
-                self.textures[texture_file] = None
-            except TypeError:
+            if textures is None:
                 no_errors_found = False
                 if self.verbose > 3: print(color.Fore.RED + "NO TEXTURES FOUND")
                 self.errors.append("Terrain {} does not reference any Textures".format(terrain_file))
+
+            else:
+                for texture in textures.groups():
+                    texture_file = os.path.basename(texture)
+
+                    if not os.path.exists(os.path.join(self.tile_dir, "textures", texture_file)):
+                        no_errors_found = False
+                        if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
+                        if texture_file not in self.textures:
+                            self.errors.append("Terrain points to {}, which does not exist".format(texture_file))
+                    else:
+                        if self.verbose > 3: print(color.Fore.GREEN + "OKAY")
+
+                    self.textures[texture_file] = None
 
         if 2 < self.verbose <= 3:
             if no_errors_found:
