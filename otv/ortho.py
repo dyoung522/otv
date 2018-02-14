@@ -57,6 +57,7 @@ class Tile:
     def validate_terrain(self):
         no_errors_found = True
         path = os.path.join(self.tile_dir, "terrain")
+        texture_regex = re.compile("textures[\\/](.+\.dds)", re.IGNORECASE)
 
         self.textures = dict(terrain_check=True)
 
@@ -76,7 +77,7 @@ class Tile:
             with open(os.path.join(path, terrain_file)) as tf:
                 texture_data = tf.read()
 
-            textures = re.search("textures/(.+\.dds)", texture_data)
+            textures = re.search(texture_regex, texture_data)
 
             if textures is None:
                 no_errors_found = False

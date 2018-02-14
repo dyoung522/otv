@@ -27,6 +27,8 @@ class ArgParse:
 
         defaults_group = parser.add_argument_group("alter defaults")
 
+        defaults_group.add_argument("--all", action="store_true",
+                                    help="check all tiles, regardless of previous status")
         pause_group = defaults_group.add_mutually_exclusive_group()
         pause_group.add_argument("-p", "-P", "--pause", action="store_true",
                                  help="Pause the program before exiting (default for Windows)")
