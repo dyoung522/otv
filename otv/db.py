@@ -1,11 +1,11 @@
-import os
+from pathlib import Path
 import sqlite3
 
 
 class DB:
-    def __init__(self, dir):
-        self.directory = dir
-        self.connection = sqlite3.connect(os.path.join(dir, "otv.db"))
+    def __init__(self, directory):
+        self.database = Path(directory, "otv.db")
+        self.connection = sqlite3.connect(str(self.database))
         self.cursor = self.connection.cursor()
         self.create()
 
@@ -21,17 +21,21 @@ class DB:
     def tiles(self):
         return self.cursor.execute("SELECT * FROM Tiles;").fetchall()
 
-    def find_tile(self, tile):
-        dbtile = self.cursor.execute("SELECT * FROM Tiles WHERE name = ?", (os.path.basename(tile),)).fetchone()
+    def find_tile(self, input_tile):
+        tile = Path(input_tile)
 
-        if dbtile is None or dbtile[2] != os.path.getmtime(tile):
+        dbtile = self.cursor.execute("SELECT * FROM Tiles WHERE name = ?", (tile.name,)).fetchone()
+
+        if dbtile is None or dbtile[2] != tile.stat().st_mtime:
             return False
 
         return True
 
-    def add_tile(self, tile):
+    def add_tile(self, input_tile):
+        tile = Path(input_tile)
+        
         self.cursor.execute(
             "INSERT OR REPLACE INTO Tiles (name, updated_at) VALUES ( ?, ? )",
-            (os.path.basename(tile), os.path.getmtime(tile))
+            (tile.name, tile.stat().st_mtime)
         )
         self.connection.commit()

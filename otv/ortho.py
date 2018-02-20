@@ -2,46 +2,42 @@ import os
 import re
 import colorama as color
 
+from pathlib import Path
+
 
 class Tile:
     DIRECTORIES = ["earth nav data", "terrain", "textures"]
 
-    lat = None
-    long = None
-    tile_dir = None
-    tile_name = None
-    water_only = False
-    opts = {}
-
-    def __init__(self, tile, dir, **opts):
-        self.tile_name = tile
-        self.tile_dir = os.path.join(dir, self.tile_name)
-        (self.lat, self.long) = re.findall("([+-]\d+)", self.tile_name.lstrip("zOrtho4XP_").strip())
+    def __init__(self, tile, **opts):
+        self.tile = Path(tile)
+        self.name = self.tile.name
+        (self.lat, self.long) = re.findall("([+-]\d+)", str(self.name).lstrip("zOrtho4XP_").strip())
         self.verbose = opts["verbose"] if "verbose" in opts else 0
         self.errors = list()
         self.textures = dict()
+        self.water_only = False
 
     def validate(self):
-        for dir in self.DIRECTORIES:
-            getattr(self, "validate_{}".format(re.sub("\s+", "_", dir)))()
+        for directory in self.DIRECTORIES:
+            getattr(self, "validate_{}".format(re.sub("\s+", "_", directory)))()
 
         return self.errors
 
-    def validate_dir(self, dir):
-        path = os.path.join(self.tile_dir, dir)
+    def validate_dir(self, directory):
+        path = self.tile / directory
 
-        if self.verbose > 2: print("  Validating {:.<35} ".format(dir.upper() + " directory"), end="")
+        if self.verbose > 2: print("  Validating {:.<35} ".format(directory.upper() + " directory"), end="")
 
-        if not os.path.isdir(path):
-            if dir != "terrain":
+        if not path.is_dir():
+            if directory != "terrain":
                 if self.verbose > 2: print(color.Fore.RED + "NOT FOUND")
-                self.errors.append("Directory \"{}\" NOT FOUND".format(dir))
+                self.errors.append("Directory \"{}\" NOT FOUND".format(directory))
 
             return False
 
         if not os.listdir(path):
             if self.verbose > 2: print(color.Fore.RED + "IS EMPTY")
-            self.errors.append("Directory \"{}\" IS EMPTY".format(dir))
+            self.errors.append("Directory \"{}\" IS EMPTY".format(directory))
             return False
 
         if self.verbose > 2: print(color.Fore.GREEN + "OKAY")
@@ -56,7 +52,7 @@ class Tile:
 
     def validate_terrain(self):
         no_errors_found = True
-        path = os.path.join(self.tile_dir, "terrain")
+        path = self.tile / "terrain"
         texture_regex = re.compile("textures[\\/](.+\.dds)", re.IGNORECASE)
 
         self.textures = dict(terrain_check=True)
@@ -74,7 +70,7 @@ class Tile:
 
             if self.verbose > 3: print("    Checking {:.<35} ".format(terrain_file), end="")
 
-            with open(os.path.join(path, terrain_file)) as tf:
+            with open(str(path / terrain_file)) as tf:
                 texture_data = tf.read()
 
             textures = re.search(texture_regex, texture_data)
@@ -86,9 +82,9 @@ class Tile:
 
             else:
                 for texture in textures.groups():
-                    texture_file = os.path.basename(texture)
+                    texture_file = Path(texture).name
 
-                    if not os.path.exists(os.path.join(self.tile_dir, "textures", texture_file)):
+                    if not (self.tile / "textures" / texture_file).exists():
                         no_errors_found = False
                         if self.verbose > 3: print(color.Fore.RED + "NO REFERENCE IN TEXTURES")
                         if texture_file not in self.textures:
@@ -109,7 +105,7 @@ class Tile:
     def validate_textures(self):
         texture_count = 0
         no_errors_found = True
-        path = os.path.join(self.tile_dir, "textures")
+        path = self.tile / "textures"
 
         if not self.validate_dir("textures"): return False
 

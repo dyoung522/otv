@@ -3,9 +3,10 @@ import colorama as color
 import itertools
 import os
 import platform
-import re
 import sys
 
+from glob import glob
+from pathlib import Path
 from tqdm import tqdm
 
 from .db import DB
@@ -20,25 +21,21 @@ def cleanup():
     color.deinit()  # Colorama
 
 
-def __get_tiles_dir(dir, regex):
-    if not os.path.isdir(dir):
+def __get_tiles_dir(directory):
+    path = Path(directory)
+
+    if not path.is_dir():
         return None
 
-    try:
-        test_file = os.listdir(dir)[0]
-    except IndexError:
-        test_file = ""
+    if glob(str(path / "zOrtho4XP_*")):
+        return path
 
-    if (os.path.basename(dir) == "Tiles") or re.match(regex, test_file):
-        return dir
-    else:
-        return os.path.join(dir, "Tiles")
+    return path if path.name == "Tiles" else (path / "Tiles")
 
 
 def main():
     err_count = 0
     tile_errors = dict()
-    ortho_pattern = re.compile("zOrtho4XP_([+-]\d+){2}")
 
     atexit.register(cleanup)
 
@@ -53,25 +50,20 @@ def main():
     vnormal = args.verbosity == 1
     verbose = args.verbosity > 1
 
-    tiles_dir = __get_tiles_dir(args.tile_directory, ortho_pattern)
+    tiles_dir = __get_tiles_dir(args.tile_directory)
 
-    if tiles_dir is None or not os.path.isdir(tiles_dir):
+    if tiles_dir is None or not tiles_dir.is_dir():
         usage(help_message, "Please provide a directory where Ortho4XP Tiles can be found", pause=args.pause)
 
-    root_dir = os.path.abspath(os.path.join(tiles_dir, os.pardir))
+    tiledb = DB(tiles_dir.parent)
 
-    # Failsafe
-    if not os.path.exists(root_dir): root_dir = tiles_dir
-
-    tiledb = DB(root_dir)
-
-    tiles = [f for f in sorted(os.listdir(tiles_dir)) if re.match(ortho_pattern, f)]
+    tiles = sorted(tiles_dir.glob("zOrtho4XP_*"))
     total_tiles_count = len(tiles)
 
     # Eliminate any tiles we've previously validated
     if not args.all:
         for tile in tiles:
-            if tiledb.find_tile(os.path.join(tiles_dir, tile)):
+            if tiledb.find_tile(tile):
                 tiles.remove(tile)
 
     tiles_count = len(tiles)
@@ -99,18 +91,20 @@ def main():
 
         # Run the validations for each Tile
         for tile in tiles:
+            tile_name = tile.name
+
             if vnormal and args.progress_bar: t.update(1)
 
             if verbose:
                 if args.verbosity > 2: print()
-                print("Analyzing Tile {:.<33} ".format(tile), end=(os.linesep if args.verbosity > 2 else ""))
+                print("Analyzing Tile {:.<33} ".format(tile_name), end=(os.linesep if args.verbosity > 2 else ""))
 
-            tile_errors[tile] = Tile(tile, dir=tiles_dir, verbose=args.verbosity).validate()
+            tile_errors[tile_name] = Tile(tile, verbose=args.verbosity).validate()
 
-            if len(tile_errors[tile]) == 0:
+            if len(tile_errors[tile_name]) == 0:
                 if args.verbosity == 2: print(color.Fore.GREEN + "OKAY")
-                tiledb.add_tile(os.path.join(tiles_dir, tile))
-                tile_errors.pop(tile)
+                tiledb.add_tile(tile)
+                tile_errors.pop(tile_name)
             else:
                 if args.verbosity == 2: print(color.Fore.RED + "ERROR")
 
