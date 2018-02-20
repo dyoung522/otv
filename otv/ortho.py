@@ -24,7 +24,7 @@ class Tile:
         return self.errors
 
     def validate_dir(self, directory):
-        path = self.tile / directory
+        path = self.tile.joinpath(directory)
 
         if self.verbose > 2: print("  Validating {:.<35} ".format(directory.upper() + " directory"), end="")
 

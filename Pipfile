@@ -13,4 +13,4 @@ tqdm = "*"
 
 [dev-packages]
 
-pytest = "*"
+pyfakefs = "*"
