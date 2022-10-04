@@ -45,7 +45,7 @@ class Tile:
         return True
 
     def validate_earth_nav_data(self):
-        if not self.validate_dir("earth nav data"):
+        if not self.validate_dir("Earth nav data"):
             return False
 
         return True
